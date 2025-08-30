@@ -1,0 +1,11 @@
+defaults:
+  aedt_version: "2024.2"
+  non_graphical: false
+  new_desktop: false
+  results_dir: "results"
+sim:
+  setup_name: "MainSetup"
+  sweep_name: "BroadbandSweep"
+  start_ghz: 1.0
+  stop_ghz: 10.0
+  step_ghz: 0.001
