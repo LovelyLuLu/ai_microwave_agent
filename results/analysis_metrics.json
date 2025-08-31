@@ -11,5 +11,38 @@
         "vswr_mean": 5.452224227468824,
         "resonant_frequency_ghz": 1.0,
         "resonant_magnitude_db": -15.413037184815124
+    },
+    "S(2,1)": {
+        "min_db": -24.91445383913271,
+        "max_db": -0.2617171656061732,
+        "mean_db": -5.575335439394961,
+        "insertion_loss_min_db": 0.2617171656061732,
+        "insertion_loss_max_db": 24.91445383913271,
+        "insertion_loss_mean_db": 5.575335439394961,
+        "resonant_frequency_ghz": 3.88,
+        "resonant_magnitude_db": -24.91445383913271
+    },
+    "S(1,2)": {
+        "min_db": -24.914453839132857,
+        "max_db": -0.2617171656061822,
+        "mean_db": -5.57533543939497,
+        "insertion_loss_min_db": 0.2617171656061822,
+        "insertion_loss_max_db": 24.914453839132857,
+        "insertion_loss_mean_db": 5.57533543939497,
+        "resonant_frequency_ghz": 3.88,
+        "resonant_magnitude_db": -24.914453839132857
+    },
+    "S(2,2)": {
+        "min_db": -15.512454957601935,
+        "max_db": -1.4805735692621216,
+        "mean_db": -6.02514652543109,
+        "return_loss_min_db": 1.4805735692621216,
+        "return_loss_max_db": 15.512454957601935,
+        "return_loss_mean_db": 6.02514652543109,
+        "vswr_min": 1.4028060322010885,
+        "vswr_max": 11.761537365736203,
+        "vswr_mean": 5.29911938239058,
+        "resonant_frequency_ghz": 1.0,
+        "resonant_magnitude_db": -15.512454957601935
     }
 }
