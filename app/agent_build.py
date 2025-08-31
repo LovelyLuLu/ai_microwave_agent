@@ -28,6 +28,7 @@ from tools.csrr_tool import CREATE_CSRR
 from tools.srr_tool import CREATE_SRR
 from tools.sim_tools import RUN_SIM
 from tools.result_analysis_tool import ANALYZE_RESULTS
+from tools.multimodal_analysis_tool import MULTIMODAL_ANALYSIS
 
 
 def make_agent():
@@ -45,7 +46,7 @@ def make_agent():
     )
 
     # 绑定工具
-    tools = [CREATE_CSRR, CREATE_SRR, RUN_SIM, ANALYZE_RESULTS]
+    tools = [CREATE_CSRR, CREATE_SRR, RUN_SIM, ANALYZE_RESULTS, MULTIMODAL_ANALYSIS]
     llm = llm.bind_tools(tools)
 
     system = SystemMessage(
