@@ -355,6 +355,18 @@ def build_srr_project(params: SRREntryParams, options: BuildSRROptions = None) -
         
         print("\nSRR结构建模完成！")
         
+        # ==============================================================================
+        # 项目解锁（建模完成后）
+        # ==============================================================================
+        
+        print("\n开始项目解锁...")
+        try:
+            # 简化的项目解锁逻辑
+            hfss.close_desktop()
+            print("建模完成后项目解锁成功")
+        except Exception as unlock_error:
+            print(f"建模完成后项目解锁失败: {unlock_error}")
+        
         return {
             "success": True,
             "message": "SRR project created successfully",
@@ -367,6 +379,16 @@ def build_srr_project(params: SRREntryParams, options: BuildSRROptions = None) -
     except Exception as e:
         error_msg = f"SRR项目创建失败: {str(e)}"
         print(error_msg)
+        
+        # 异常情况下的项目解锁
+        print("\n异常情况下开始项目解锁...")
+        try:
+            if 'hfss' in locals() and hfss:
+                hfss.close_desktop()
+            print("异常情况下项目解锁完成")
+        except Exception as unlock_error:
+            print(f"异常情况下项目解锁失败: {unlock_error}")
+        
         return {
             "success": False,
             "message": f"SRR project creation failed: {str(e)}",
@@ -376,6 +398,16 @@ def build_srr_project(params: SRREntryParams, options: BuildSRROptions = None) -
             "params": params.model_dump() if 'params' in locals() else None,
             "error": str(e)
         }
+    
+    finally:
+        # 最终的资源清理和项目解锁
+        try:
+            if 'hfss' in locals() and hfss:
+                print("\n最终资源清理...")
+                hfss.close_desktop()
+                print("最终资源清理完成")
+        except Exception as final_error:
+            print(f"最终资源清理失败: {final_error}")
 
 
 class CreateSRRTool(BaseTool):

@@ -16,6 +16,7 @@ from ansys.aedt.core.generic.general_methods import pyaedt_function_handler
 import matplotlib.pyplot as plt
 
 
+
 class ResultAnalysisParams(BaseModel):
     """HFSS仿真结果分析参数"""
     
@@ -486,14 +487,23 @@ def analyze_hfss_results(params: ResultAnalysisParams) -> Dict[str, Any]:
         result["success"] = True
         result["message"] = f"HFSS仿真结果分析完成，共生成 {len(result['generated_files'])} 个文件"
         
+
+        
     except Exception as e:
         result["error"] = str(e)
         print(f"分析过程中发生错误: {e}")
         
+
+        
     finally:
-        if hfss:
-            # 保持AEDT打开，不关闭
-            pass
+        # 最终的资源清理
+        try:
+            if hfss:
+                print("\n最终资源清理...")
+                hfss.close_project()
+                print("最终资源清理完成")
+        except Exception as final_error:
+            print(f"最终资源清理失败: {final_error}")
             
     return result
 

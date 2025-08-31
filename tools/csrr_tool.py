@@ -457,6 +457,7 @@ def build_csrr_project(params: CSRREntryParams, options: BuildCSRROptions = None
         
     except Exception as e:
         print(f"创建CSRR项目时发生错误: {e}")
+        
         return {
             "success": False,
             "message": f"CSRR project creation failed: {str(e)}",
@@ -468,11 +469,14 @@ def build_csrr_project(params: CSRREntryParams, options: BuildCSRROptions = None
         }
     
     finally:
-        # 释放HFSS资源（但不关闭项目和桌面）
+        # 释放HFSS资源
         try:
-            hfss.release_desktop(close_projects=False, close_desktop=False)
-        except:
-            pass
+            if 'hfss' in locals() and hfss:
+                print("\n释放HFSS资源...")
+                hfss.release_desktop()
+                print("HFSS资源释放完成")
+        except Exception as e:
+            print(f"释放HFSS资源失败: {e}")
 
 # ---------- LangChain工具定义 ----------
 class CreateCSRRTool(BaseTool):
@@ -480,7 +484,7 @@ class CreateCSRRTool(BaseTool):
     
     name: str = "CREATE_CSRR"
     description: str = """该函数用于使用 PyAEDT 工具直接在 Ansys HFSS 中创建一个 **CSRR (Complementary Split-Ring Resonator) 结构**。
-    CSRR 是一种用于微波和无线通信系统的常见电磁元件，通常用于设计传感器、滤波器、天线等。
+    CSRR 是一种用于微波和无线通信系统的常见电磁元件，通常用于设计传感器等。
     
     **功能描述**：
     1. 根据输入参数，自动在 HFSS 中创建一个符合指定尺寸的 CSRR 结构。

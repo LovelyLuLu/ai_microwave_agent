@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
 from ansys.aedt.core import Hfss, Desktop
 from ansys.aedt.core.generic.general_methods import pyaedt_function_handler
+# 移除项目解锁工具导入
 
 
 class SimulationParams(BaseModel):
@@ -455,11 +456,40 @@ def run_hfss_simulation(params: SimulationParams, options: SimulationOptions = N
 
         # 初始化HFSS，连接到现有项目
         print(f"正在连接到项目: {latest_project_path}")
-        hfss = Hfss(
-            project=latest_project_path,
-            non_graphical=params.non_graphical,
-            new_desktop=False,
-        )
+        try:
+            # 首先尝试连接到现有项目
+            hfss = Hfss(
+                project=latest_project_path,
+                non_graphical=params.non_graphical,
+                new_desktop=False,
+            )
+        except Exception as e:
+            error_msg = str(e).lower()
+            if "locked" in error_msg or "project is locked" in error_msg:
+                print("项目被锁定，尝试使用新的Desktop实例...")
+                try:
+                    # 如果项目被锁定，尝试使用新的Desktop实例
+                    from ansys.aedt.core import Desktop
+                    # 先尝试关闭现有Desktop
+                    try:
+                        desktop = Desktop()
+                        desktop.close_desktop()
+                    except:
+                        pass
+                    
+                    # 使用新的Desktop实例
+                    hfss = Hfss(
+                        project=latest_project_path,
+                        non_graphical=params.non_graphical,
+                        new_desktop=True,
+                    )
+                    print("成功使用新Desktop实例连接到项目")
+                except Exception as e2:
+                    result["error"] = f"项目被锁定且无法创建新Desktop实例: {str(e2)}。请手动关闭AEDT后重试。"
+                    return result
+            else:
+                result["error"] = f"连接HFSS项目时发生错误: {str(e)}"
+                return result
         print(f"成功连接到项目: {hfss.project_name}")
         print(f"当前设计: {hfss.design_name}")
         
@@ -551,53 +581,41 @@ def run_hfss_simulation(params: SimulationParams, options: SimulationOptions = N
             result["success"] = True
             result["message"] = f"仿真完成，用时 {simulation_time:.2f} 秒"
             
+            print("\n仿真完成，准备清理资源...")
+            
         except Exception as e:
             print(f"错误：仿真执行失败。{e}")
             result["error"] = f"仿真执行失败: {str(e)}"
             # 确保停止监控
             monitor.stop_monitoring()
+            
+            print("\n异常情况下准备清理资源...")
 
     except Exception as e:
         print(f"\n发生严重错误: {e}")
         result["error"] = f"严重错误: {str(e)}"
+        
+        print("\n严重错误情况下准备清理资源...")
 
     finally:
-        # 5. 释放桌面和关闭HFSS程序
-        if hfss:
-            try:
+        # 最终的资源清理
+        try:
+            if hfss:
+                print("\n最终资源清理...")
                 # 保存项目
                 if options.save_project:
-                    print("\n正在保存项目...")
+                    print("正在保存项目...")
                     hfss.save_project()
                     print("项目已保存。")
                 
-                # 获取Desktop实例
-                desktop = hfss.desktop_class
-                
-                # 释放HFSS实例
-                print("\n正在释放HFSS实例...")
-                hfss.release_desktop(close_projects=True, close_desktop=True)
-                
-                # 确保Desktop完全关闭
-                if desktop:
-                    try:
-                        desktop.close_desktop()
-                        print("Desktop已关闭。")
-                    except:
-                        pass
-                        
-                print("已断开与AEDT的连接并关闭程序。")
-                
-            except Exception as e:
-                print(f"释放资源时出错: {e}")
-                # 强制关闭Desktop
-                try:
-                    from ansys.aedt.core import Desktop
-                    desktop = Desktop()
-                    desktop.close_desktop()
-                    print("强制关闭Desktop成功。")
-                except:
-                    print("无法强制关闭Desktop。")
+                # 释放Desktop资源
+                if options.release_desktop:
+                    print("正在释放Desktop资源...")
+                    hfss.close_desktop()
+                    print("Desktop资源已释放")
+                print("最终资源清理完成")
+        except Exception as final_error:
+            print(f"最终资源清理失败: {final_error}")
 
     print("="*70)
     print("HFSS仿真求解流程执行完毕。")

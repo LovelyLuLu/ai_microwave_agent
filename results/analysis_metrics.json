@@ -1,0 +1,15 @@
+{
+    "S(1,1)": {
+        "min_db": -15.413037184815124,
+        "max_db": -0.839202105699359,
+        "mean_db": -6.269433123939296,
+        "return_loss_min_db": 0.839202105699359,
+        "return_loss_max_db": 15.413037184815124,
+        "return_loss_mean_db": 6.269433123939296,
+        "vswr_min": 1.408389837849486,
+        "vswr_max": 20.716452625165676,
+        "vswr_mean": 5.452224227468824,
+        "resonant_frequency_ghz": 1.0,
+        "resonant_magnitude_db": -15.413037184815124
+    }
+}
