@@ -1,5 +1,5 @@
 """多模态仿真结果图像分析工具
-基于多模态大模型qwen_vl_max的LangChain工具实现
+基于多模态大模型(qwen_vl_max, gemini-2.5-pro)的LangChain工具实现
 提供仿真结果图像识别和分析报告生成功能
 """
 
@@ -13,18 +13,26 @@ from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
 import dashscope
 from dashscope import MultiModalConversation
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 # 加载环境变量
 load_dotenv()
 
-# 初始化DashScope API
+# 初始化API配置
 def initialize_dashscope():
     """初始化DashScope API配置"""
     api_key = os.getenv('DASHSCOPE_API_KEY')
     if not api_key:
         raise Exception("未找到DASHSCOPE_API_KEY环境变量，请在.env文件中配置")
     dashscope.api_key = api_key
+
+def initialize_gemini():
+    """初始化Gemini API配置"""
+    api_key = os.getenv('GEMINI_API_KEY')
+    if not api_key:
+        raise Exception("未找到GEMINI_API_KEY环境变量，请在.env文件中配置")
+    genai.configure(api_key=api_key)
 
 
 class MultimodalAnalysisParams(BaseModel):
@@ -35,6 +43,8 @@ class MultimodalAnalysisParams(BaseModel):
         default="results",
         description="仿真结果图像文件夹路径，默认为results文件夹"
     )
+    
+
     
     # 分析选项
     include_s_parameters: bool = Field(
@@ -229,11 +239,17 @@ def call_multimodal_model(images: List[str], prompt: str) -> Dict[str, Any]:
         prompt: 分析提示词
         
     Returns:
-        模型分析结果
+        包含分析结果和token使用量的字典
     """
+    
+    # 在这里配置要使用的模型
+    # 支持的模型: "qwen-vl-max", "gemini-2.5-pro"
+    model_name = "qwen-vl-max"  # 修改此行来切换模型
     try:
-        # 初始化API
-        initialize_dashscope()
+        # 验证模型名称
+        supported_models = ["qwen-vl-max", "gemini-2.5-pro"]
+        if model_name not in supported_models:
+            raise Exception(f"不支持的模型: {model_name}，支持的模型: {supported_models}")
         
         # 验证图像文件
         valid_images = []
@@ -249,9 +265,26 @@ def call_multimodal_model(images: List[str], prompt: str) -> Dict[str, Any]:
         if not valid_images:
             raise Exception("没有找到有效的图像文件")
         
+        print(f"正在调用{model_name}模型分析 {len(valid_images)} 张图像...")
+        
+        if model_name == "qwen-vl-max":
+            return _call_qwen_model(valid_images, prompt)
+        elif model_name == "gemini-2.5-pro":
+            return _call_gemini_model(valid_images, prompt)
+            
+    except Exception as e:
+        raise Exception(f"多模态模型调用错误: {str(e)}")
+
+
+def _call_qwen_model(images: List[str], prompt: str) -> Dict[str, Any]:
+    """调用Qwen VL Max模型"""
+    try:
+        # 初始化API
+        initialize_dashscope()
+        
         # 准备图像数据
         image_contents = []
-        for image_path in valid_images:
+        for image_path in images:
             try:
                 encoded_image = encode_image_to_base64(image_path)
                 image_contents.append({
@@ -272,8 +305,6 @@ def call_multimodal_model(images: List[str], prompt: str) -> Dict[str, Any]:
                 {"text": prompt}
             ] + image_contents
         }]
-        
-        print(f"正在调用qwen-vl-max模型分析 {len(image_contents)} 张图像...")
         
         # 调用模型
         response = MultiModalConversation.call(
@@ -307,14 +338,83 @@ def call_multimodal_model(images: List[str], prompt: str) -> Dict[str, Any]:
                 analysis_text = str(content)
                 
             return {
-                'analysis_result': analysis_text,
-                'token_usage': token_usage
-            }
+                 'analysis_result': analysis_text,
+                 'token_usage': token_usage,
+                 'model_name': 'qwen-vl-max'
+             }
         else:
-            raise Exception(f"模型调用失败 (状态码: {response.status_code}): {response.message}")
+            raise Exception(f"Qwen模型调用失败 (状态码: {response.status_code}): {response.message}")
             
     except Exception as e:
-        raise Exception(f"多模态模型调用错误: {str(e)}")
+        raise Exception(f"Qwen模型调用错误: {str(e)}")
+
+
+def _call_gemini_model(images: List[str], prompt: str) -> Dict[str, Any]:
+    """调用Gemini 2.0 Flash Exp模型"""
+    try:
+        # 初始化API
+        initialize_gemini()
+        
+        # 准备图像数据
+        image_parts = []
+        for image_path in images:
+            try:
+                with open(image_path, 'rb') as f:
+                    image_data = f.read()
+                
+                # 获取图像格式
+                if image_path.lower().endswith('.png'):
+                    mime_type = 'image/png'
+                elif image_path.lower().endswith(('.jpg', '.jpeg')):
+                    mime_type = 'image/jpeg'
+                else:
+                    mime_type = 'image/png'  # 默认
+                
+                image_parts.append({
+                    'mime_type': mime_type,
+                    'data': image_data
+                })
+                print(f"成功加载图像: {os.path.basename(image_path)}")
+            except Exception as e:
+                print(f"警告: 图像加载失败 {image_path}: {str(e)}")
+                continue
+        
+        if not image_parts:
+            raise Exception("所有图像文件加载失败")
+        
+        # 创建模型实例
+        model = genai.GenerativeModel('gemini-2.5-pro')
+        
+        # 构建内容
+        content_parts = [prompt] + image_parts
+        
+        # 调用模型
+        response = model.generate_content(
+            content_parts,
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.1,
+                max_output_tokens=4096,
+            )
+        )
+        
+        # 获取分析结果
+        analysis_text = response.text
+        
+        # 获取token使用量信息
+        token_usage = {
+            'input_tokens': response.usage_metadata.prompt_token_count if hasattr(response, 'usage_metadata') and hasattr(response.usage_metadata, 'prompt_token_count') else 0,
+            'output_tokens': response.usage_metadata.candidates_token_count if hasattr(response, 'usage_metadata') and hasattr(response.usage_metadata, 'candidates_token_count') else 0,
+            'total_tokens': response.usage_metadata.total_token_count if hasattr(response, 'usage_metadata') and hasattr(response.usage_metadata, 'total_token_count') else 0
+        }
+        
+        return {
+            'analysis_result': analysis_text,
+            'token_usage': token_usage,
+            'model_name': 'qwen-vl-max'
+        }
+            
+    except Exception as e:
+        raise Exception(f"Gemini模型调用错误: {str(e)}")
 
 
 def analyze_simulation_images(params: MultimodalAnalysisParams) -> Dict[str, Any]:
@@ -357,7 +457,7 @@ def analyze_simulation_images(params: MultimodalAnalysisParams) -> Dict[str, Any
             },
             "total_images": len(images_to_analyze),
             "analysis_report": model_response['analysis_result'],
-            "model_used": "qwen-vl-max",
+            "model_used": model_response.get('model_name', 'unknown'),
             "token_usage": model_response['token_usage']
         }
         
@@ -430,23 +530,24 @@ class MultimodalAnalysisTool(BaseTool):
     
     name: str = "MULTIMODAL_ANALYSIS"
     description: str = """
-    多模态仿真结果图像分析工具 - 使用qwen_vl_max模型分析HFSS仿真结果图像
-    
+    多模态仿真结果图像分析工具 - 支持多种多模态大模型分析HFSS仿真结果图像
+
     **功能描述**：
     1. 自动识别results文件夹中的仿真结果图像（S11、S21、S12、S22、VSWR等）
-    2. 调用多模态大模型qwen_vl_max进行专业的图像分析
+    2. 调用多模态大模型进行专业的图像分析（支持qwen-vl-max和gemini-2.5-pro）
     3. 生成详细的仿真结果分析报告，包括性能评估和设计建议
     4. 支持Markdown和JSON格式的报告输出
-    
+    5. 提供Token使用量统计和成本监控
+
     **主要分析内容**：
     - S参数性能分析（回波损耗、插入损耗、谐振频率等）
     - VSWR特性分析
     - 器件性能评估和设计建议
     - 技术结论和改进方向
-    
+
     **必需参数**：
     无（使用默认配置即可）
-    
+
     **可选参数**：
     - results_dir: 结果文件夹路径（默认"results"）
     - include_s_parameters: 是否分析S参数图像（默认true）
@@ -455,6 +556,10 @@ class MultimodalAnalysisTool(BaseTool):
     - save_report: 是否保存报告文件（默认true）
     - report_filename: 自定义报告文件名（默认自动生成）
     
+    **模型配置**：
+    - 默认使用 qwen-vl-max 模型
+    - 如需切换到 gemini-2.5-pro，请修改代码中的 model_name 变量
+
     **输出**：
     返回包含分析结果的详细报告，并可选择保存到文件。
     """
