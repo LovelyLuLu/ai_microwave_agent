@@ -21,11 +21,11 @@ AI-Microwave-Agent/
 ## 3) 端到端最小验证
 ### 创建工程
 ```bash
-python -m app.agent_build --input "请创建一个 2.45GHz 的 CSRR（RO4350B），并告诉我工程路径"
+python app/agent_build.py --input "请创建一个CSRR结构，外环外半径3.5mm，环宽度0.6mm，开口宽度0.2mm，内外环间距0.7mm，微带线宽度1.4mm" 
 ```
 ### 跑仿真
 ```bash
-python -m app.agent_build --input "对上一个工程执行仿真"
+python -m app.agent_build --input "请对刚创建的CSRR结构进行仿真，频率范围1-10GHz，步长0.01GHz，使用Fast扫频"
 ```
 或显式指定：
 ```bash

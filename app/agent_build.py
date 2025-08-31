@@ -71,25 +71,17 @@ def get_history(session_id: str):
     return _sessions[session_id]
 
 
-def main():
-    import argparse, json
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--input", required=True, help="用户输入的自然语言指令")
-    ap.add_argument("--session", default="default")
-    args = ap.parse_args()
-
-    llm, tools, system = make_agent()
+def process_user_input(user_input, session_id, llm, tools_map, system):
+    """处理单次用户输入"""
+    import json
     
-    # 创建工具映射
-    tools_map = {tool.name: tool for tool in tools}
-
     # 获取历史记录并添加系统消息
-    history = get_history(args.session)
+    history = get_history(session_id)
     if not history.messages or not any(isinstance(msg, SystemMessage) for msg in history.messages):
         history.add_message(system)
     
     # 添加用户消息
-    history.add_message(HumanMessage(content=args.input))
+    history.add_message(HumanMessage(content=user_input))
     
     # 调用 LLM
     resp = llm.invoke(history.messages)
@@ -147,6 +139,82 @@ def main():
     else:
         # 没有工具调用，直接输出AI回复
         print(resp.content)
+
+
+def interactive_mode(session_id="default"):
+    """交互式模式"""
+    llm, tools, system = make_agent()
+    tools_map = {tool.name: tool for tool in tools}
+    
+    print("="*60)
+    print("🤖 微波工程AI助手 - 交互模式")
+    print("="*60)
+    print("欢迎使用微波工程AI助手！")
+    print("我可以帮助您进行CSRR/SRR结构的设计、仿真和分析。")
+    print("\n可用命令:")
+    print("  - 输入您的需求进行对话")
+    print("  - 输入 'exit' 或 'quit' 退出")
+    print("  - 输入 'clear' 清除当前会话历史")
+    print("  - 输入 'help' 查看帮助信息")
+    print("-"*60)
+    
+    while True:
+        try:
+            user_input = input("\n👤 您: ").strip()
+            
+            if not user_input:
+                continue
+                
+            # 处理特殊命令
+            if user_input.lower() in ['exit', 'quit', '退出']:
+                print("\n👋 感谢使用微波工程AI助手，再见！")
+                break
+            elif user_input.lower() in ['clear', '清除']:
+                if session_id in _sessions:
+                    del _sessions[session_id]
+                print("\n✅ 会话历史已清除")
+                continue
+            elif user_input.lower() in ['help', '帮助']:
+                print("\n📖 帮助信息:")
+                print("1. 创建CSRR结构: '请创建一个CSRR结构，外环外半径3.5mm...'")
+                print("2. 创建SRR结构: '请创建一个SRR结构，外环外半径3.5mm...'")
+                print("3. 运行仿真: '请对刚创建的结构进行仿真，频率范围1-10GHz...'")
+                print("4. 查看工具信息: '有哪些可用的工具？'")
+                continue
+            
+            print("\n🤖 AI助手:")
+            print("-"*40)
+            
+            # 处理用户输入
+            process_user_input(user_input, session_id, llm, tools_map, system)
+            
+        except KeyboardInterrupt:
+            print("\n\n👋 检测到中断信号，正在退出...")
+            break
+        except EOFError:
+            print("\n\n👋 检测到EOF，正在退出...")
+            break
+        except Exception as e:
+            print(f"\n❌ 发生错误: {e}")
+            print("请重试或输入 'exit' 退出")
+
+
+def main():
+    import argparse
+    ap = argparse.ArgumentParser(description="微波工程AI助手")
+    ap.add_argument("--input", help="用户输入的自然语言指令（如果不提供则进入交互模式）")
+    ap.add_argument("--session", default="default", help="会话ID")
+    ap.add_argument("--interactive", "-i", action="store_true", help="强制进入交互模式")
+    args = ap.parse_args()
+
+    # 如果没有提供input参数或者指定了interactive参数，进入交互模式
+    if not args.input or args.interactive:
+        interactive_mode(args.session)
+    else:
+        # 单次命令模式（保持原有功能）
+        llm, tools, system = make_agent()
+        tools_map = {tool.name: tool for tool in tools}
+        process_user_input(args.input, args.session, llm, tools_map, system)
 
 
 if __name__ == "__main__":
