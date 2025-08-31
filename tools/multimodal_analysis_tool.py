@@ -244,7 +244,7 @@ def call_multimodal_model(images: List[str], prompt: str) -> Dict[str, Any]:
     
     # 在这里配置要使用的模型
     # 支持的模型: "qwen-vl-max", "gemini-2.5-pro"
-    model_name = "qwen-vl-max"  # 修改此行来切换模型
+    model_name = "gemini-2.5-pro"  # 修改此行来切换模型
     try:
         # 验证模型名称
         supported_models = ["qwen-vl-max", "gemini-2.5-pro"]
@@ -268,15 +268,15 @@ def call_multimodal_model(images: List[str], prompt: str) -> Dict[str, Any]:
         print(f"正在调用{model_name}模型分析 {len(valid_images)} 张图像...")
         
         if model_name == "qwen-vl-max":
-            return _call_qwen_model(valid_images, prompt)
+            return _call_qwen_model(valid_images, prompt, model_name)
         elif model_name == "gemini-2.5-pro":
-            return _call_gemini_model(valid_images, prompt)
+            return _call_gemini_model(valid_images, prompt, model_name)
             
     except Exception as e:
         raise Exception(f"多模态模型调用错误: {str(e)}")
 
 
-def _call_qwen_model(images: List[str], prompt: str) -> Dict[str, Any]:
+def _call_qwen_model(images: List[str], prompt: str, model_name: str) -> Dict[str, Any]:
     """调用Qwen VL Max模型"""
     try:
         # 初始化API
@@ -309,7 +309,8 @@ def _call_qwen_model(images: List[str], prompt: str) -> Dict[str, Any]:
         # 调用模型
         response = MultiModalConversation.call(
             model='qwen-vl-max',
-            messages=messages
+            messages=messages,
+            max_tokens=8192  # 增加输出token限制以避免报告截断
         )
         
         if response.status_code == 200:
@@ -340,7 +341,7 @@ def _call_qwen_model(images: List[str], prompt: str) -> Dict[str, Any]:
             return {
                  'analysis_result': analysis_text,
                  'token_usage': token_usage,
-                 'model_name': 'qwen-vl-max'
+                 'model_name': model_name
              }
         else:
             raise Exception(f"Qwen模型调用失败 (状态码: {response.status_code}): {response.message}")
@@ -349,7 +350,7 @@ def _call_qwen_model(images: List[str], prompt: str) -> Dict[str, Any]:
         raise Exception(f"Qwen模型调用错误: {str(e)}")
 
 
-def _call_gemini_model(images: List[str], prompt: str) -> Dict[str, Any]:
+def _call_gemini_model(images: List[str], prompt: str, model_name: str) -> Dict[str, Any]:
     """调用Gemini 2.0 Flash Exp模型"""
     try:
         # 初始化API
@@ -393,7 +394,7 @@ def _call_gemini_model(images: List[str], prompt: str) -> Dict[str, Any]:
             content_parts,
             generation_config=genai.types.GenerationConfig(
                 temperature=0.1,
-                max_output_tokens=4096,
+                max_output_tokens=8192,  # 增加输出token限制以避免报告截断
             )
         )
         
@@ -410,7 +411,7 @@ def _call_gemini_model(images: List[str], prompt: str) -> Dict[str, Any]:
         return {
             'analysis_result': analysis_text,
             'token_usage': token_usage,
-            'model_name': 'qwen-vl-max'
+            'model_name': model_name
         }
             
     except Exception as e:
