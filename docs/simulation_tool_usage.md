@@ -151,8 +151,8 @@ start_freq: Input should be greater than 0
 
 ### 完整工作流程
 1. **设计阶段**: 使用`CREATE_SRR`或`CREATE_CSRR`创建器件模型
-2. **仿真阶段**: 使用`RUN_SIM`进行仿真分析 ← **本工具**
-3. **分析阶段**: 使用`ANALYZE_RESULTS`提取和分析仿真结果
+154| 2. **仿真阶段**: 使用`RUN_SIM`进行仿真分析 ← **本工具**
+3. **分析阶段**: 使用`ANALYZE_HFSS_RESULTS`提取和分析仿真结果
 
 ### 示例对话流程
 ```
@@ -163,7 +163,7 @@ Agent: [调用CREATE_CSRR] → "CSRR结构已创建，需要现在开始仿真�
 Agent: [调用RUN_SIM] → "仿真已完成，需要分析结果吗？"
 
 用户: "分析S参数"
-Agent: [调用ANALYZE_RESULTS] → "S参数分析完成，结果已导出"
+Agent: [调用ANALYZE_HFSS_RESULTS] → "S参数分析完成，结果已导出"
 ```
 
 ## 技术细节
@@ -181,7 +181,7 @@ tools/
 ├── sim_tools.py          # 仿真工具主文件
 ├── srr_tool.py          # SRR创建工具
 ├── csrr_tool.py         # CSRR创建工具
-└── result_tool.py       # 结果分析工具
+└── result_analysis_tool.py  # 结果分析工具
 ```
 
 ### 监控功能

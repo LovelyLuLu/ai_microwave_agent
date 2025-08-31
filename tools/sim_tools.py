@@ -76,8 +76,8 @@ class SimulationOptions(BaseModel):
         description="是否保存项目"
     )
     release_desktop: bool = Field(
-        default=False,
-        description="仿真完成后是否释放桌面"
+        default=True,
+        description="仿真完成后是否释放桌面并关闭HFSS程序"
     )
 
 
@@ -562,10 +562,42 @@ def run_hfss_simulation(params: SimulationParams, options: SimulationOptions = N
         result["error"] = f"严重错误: {str(e)}"
 
     finally:
-        # 5. 释放桌面 (根据需要决定是否关闭AEDT)
-        if hfss and options.release_desktop:
-            hfss.release_desktop()
-            print("\n已断开与AEDT的连接。")
+        # 5. 释放桌面和关闭HFSS程序
+        if hfss:
+            try:
+                # 保存项目
+                if options.save_project:
+                    print("\n正在保存项目...")
+                    hfss.save_project()
+                    print("项目已保存。")
+                
+                # 获取Desktop实例
+                desktop = hfss.desktop_class
+                
+                # 释放HFSS实例
+                print("\n正在释放HFSS实例...")
+                hfss.release_desktop(close_projects=True, close_desktop=True)
+                
+                # 确保Desktop完全关闭
+                if desktop:
+                    try:
+                        desktop.close_desktop()
+                        print("Desktop已关闭。")
+                    except:
+                        pass
+                        
+                print("已断开与AEDT的连接并关闭程序。")
+                
+            except Exception as e:
+                print(f"释放资源时出错: {e}")
+                # 强制关闭Desktop
+                try:
+                    from ansys.aedt.core import Desktop
+                    desktop = Desktop()
+                    desktop.close_desktop()
+                    print("强制关闭Desktop成功。")
+                except:
+                    print("无法强制关闭Desktop。")
 
     print("="*70)
     print("HFSS仿真求解流程执行完毕。")
