@@ -124,86 +124,104 @@ def generate_analysis_prompt() -> str:
         分析提示词字符串
     """
     prompt = """
-你是一位资深的微波工程师和HFSS仿真分析专家，拥有丰富的射频/微波器件设计和分析经验。请基于提供的HFSS仿真结果图像，生成一份专业、详细的技术分析报告。
+你是一位顶级的微波工程专家和HFSS仿真大师，拥有超过20年的复杂电磁问题分析经验。你的任务是基于提供的HFSS仿真结果图像，生成一份全面、深度、专业的分析报告，不仅要解读数据，更要提供富有洞察力的工程见解。
 
-**分析要求**：
-1. 仔细观察每张图像的坐标轴、数值范围、曲线形状和关键特征点
-2. 提供具体的数值读取和技术解释
-3. 基于工程实践给出专业评估和建议
+**分析原则**:
+- **精准**: 所有数据读取必须精确，分析必须严谨。
+- **深度**: 超越表面现象，揭示设计背后的物理意义和性能瓶颈。
+- **专业**: 使用行业标准术语，展现专家级的知识和经验。
+- **价值**: 提供切实可行、具有高工程价值的优化建议。
 
-请按照以下结构进行分析：
+请严格按照以下结构和要求进行分析：
 
-## 1. 图像识别与基本信息
-- **图像类型识别**：明确识别每张图像对应的参数类型（S11、S21、S12、S22、VSWR等）
-- **频率范围**：读取并报告仿真的频率范围（起始频率到终止频率）
-- **数据完整性**：评估曲线的连续性和数据质量
-- **坐标轴信息**：确认Y轴的单位和数值范围
+---
 
-## 2. S参数详细分析
+### **报告标题: HFSS仿真结果多模态深度分析报告**
 
-### 2.1 反射参数分析（S11, S22）
-- **回波损耗性能**：
-  - 读取最小回波损耗值及其对应频率
-  - 评估-10dB带宽（如适用）
-  - 分析匹配性能的频率特性
-- **谐振特性**：
-  - 识别谐振频率点（回波损耗最小值点）
-  - 计算谐振频率处的具体回波损耗值
-  - 评估谐振的尖锐度和Q值特性
-- **带宽分析**：
-  - 计算-3dB带宽、-10dB带宽等关键指标
-  - 评估带宽与中心频率的比值
+---
 
-### 2.2 传输参数分析（S21, S12）
-- **插入损耗特性**：
-  - 读取通带内的最大和最小插入损耗
-  - 分析插入损耗的频率平坦度
-- **传输特性**：
-  - 评估通带和阻带性能
-  - 识别传输零点和极点
-- **对称性分析**：
-  - 比较S21和S12的对称性（如果两者都存在）
-  - 评估器件的互易性
+### **1. 核心性能指标 (KPI) 摘要**
+以表格形式汇总关键性能指标，提供快速概览。
+| 性能指标 | 数值 | 频率 | 评估 |
+| :--- | :--- | :--- | :--- |
+| **最小回波损耗 (S11)** | (dB) | (GHz) | (优/良/中/差) |
+| **-10dB 带宽** | (MHz/GHz) | (GHz) | (宽/中/窄) |
+| **中心频率** | (GHz) | - | - |
+| **最小插入损耗 (S21)** | (dB) | (GHz) | (优/良/中/差) |
+| **通带平坦度** | (dB) | (GHz) | (优/良/中/差) |
+| **VSWR < 2 的带宽** | (MHz/GHz) | (GHz) | (宽/中/窄) |
+| **VSWR 最小值** | - | (GHz) | (优/良/中/差) |
 
-## 3. VSWR深度分析
-如果包含VSWR图像：
-- **数值范围**：读取VSWR的最小值、最大值和典型工作频段的数值
-- **匹配评估**：
-  - 识别VSWR < 2的频率范围（良好匹配区域）
-  - 评估VSWR < 1.5的频率范围（优秀匹配区域）
-- **频率特性**：分析VSWR随频率的变化趋势和关键特征点
+---
 
-## 4. 器件类型推断与性能评估
-- **器件类型判断**：基于S参数特征推断可能的器件类型（滤波器、耦合器、天线、传输线等）
-- **性能等级评估**：
-  - 与典型器件性能指标对比
-  - 评估是否满足常见应用要求
-- **优势与不足**：
-  - 总结设计的优点
-  - 指出可能的性能瓶颈或问题
+### **2. 图像识别与仿真设置分析**
+- **图像类型识别**: 准确识别每张图对应的参数（S11, S21, S12, S22, VSWR等）。
+- **仿真频率范围**: 明确报告仿真的起始和终止频率。
+- **坐标轴解读**: 确认X轴和Y轴的单位、刻度和范围，并评估其合理性。
+- **数据质量评估**: 检查曲线的平滑度、连续性，判断是否存在仿真噪声或收敛问题。
 
-## 5. 工程建议与优化方向
-- **设计优化建议**：
-  - 基于分析结果提出具体的结构优化建议
-  - 建议可能的参数调整方向
-- **应用适用性**：评估当前设计适合的应用场景和频段
-- **进一步仿真建议**：建议可能需要的额外仿真分析
+---
 
-## 6. 技术结论与总结
-- **关键性能指标汇总**：列出所有重要的数值指标
-- **整体设计质量评价**：给出综合性能评估
-- **应用前景**：评估设计的实用性和商业价值
+### **3. S参数深度分析**
 
-**注意事项**：
-- 请尽可能从图像中读取具体的数值
-- 所有分析应基于实际观察到的图像特征
-- 提供的建议应具有工程实践意义
-- 使用专业的微波工程术语和标准
+#### **3.1 反射/匹配性能 (S11, S22)**
+- **回波损耗 (Return Loss)**:
+  - **谐振点分析**: 精确读取谐振频率和对应的最小回波损耗值。
+  - **带宽评估**: 计算并报告-10dB和-3dB带宽，并评估其相对带宽（带宽/中心频率）。
+  - **带外抑制**: 分析工作频带之外的抑制性能。
+- **匹配效率**:
+  - 结合Smith圆图（如果可用）或基于S11数据，评估输入阻抗与系统阻抗（通常为50Ω）的匹配程度。
+
+#### **3.2 传输/插入损耗性能 (S21, S12)**
+- **插入损耗 (Insertion Loss)**:
+  - **通带分析**: 读取通带内的最小、最大和平均插入损耗。评估通带平坦度。
+  - **阻带分析**: 评估阻带的抑制深度和滚降速率。
+- **隔离度 (Isolation)**: 如果是多端口器件，分析端口间的隔离度。
+- **对称性与互易性**: 比较S21和S12曲线，评估器件的对称性和是否满足互易性。
+
+---
+
+### **4. VSWR 分析**
+- **匹配带宽**:
+  - **VSWR < 2**: 识别并报告此范围的频率带宽，这是大多数应用的最低要求。
+  - **VSWR < 1.5**: 识别并报告此范围的频率带宽，代表高性能匹配。
+- **频率特性**: 分析VSWR随频率变化的趋势，识别其最小值点和对应的频率。
+
+---
+
+### **5. 器件类型推断与性能评估**
+- **器件类型判断**: 基于S参数的“指纹”特征，推断最可能的器件类型（例如：带通滤波器、低通滤波器、带阻滤波器、天线、耦合器、功分器等），并解释判断依据。
+- **性能等级评估**:
+  - **行业基准比较**: 将关键性能与该类型器件的行业典型指标进行比较。
+  - **应用符合性**: 评估其是否满足特定应用（如5G、Wi-Fi、卫星通信等）的要求。
+- **设计优缺点分析**:
+  - **优点**: 总结该设计的突出优点（如：低损耗、宽带宽、高抑制等）。
+  - **潜在问题**: 指出设计中可能存在的性能瓶颈或需要关注的问题。
+
+---
+
+### **6. 工程优化建议**
+- **具体优化方向**:
+  - **尺寸调整**: 提出具体的物理结构（如：谐振器长度、耦合间隙、馈线宽度等）调整建议，并说明其对性能的预期影响。
+  - **材料选择**: 建议是否可以更换基板材料以改善性能（如：降低损耗、提高功率容量）。
+- **进一步仿真建议**: 建议进行哪些额外的仿真分析（如：参数扫描、公差分析、场分布分析）来进一步验证和优化设计。
+
+---
+
+### **7. 结论与展望**
+- **综合评估**: 对设计的整体性能给出一个明确、中肯的综合评价。
+- **应用前景**: 评估该设计在实际工程应用中的潜力和价值。
+- **创新性评估**: 简要评估该设计是否体现了新颖的思路或结构。
+
+**最终要求**:
+- 报告应以Markdown格式清晰呈现。
+- 语言风格需专业、客观、精炼。
+- 确保所有分析都基于图像数据，避免无根据的猜测。
 """
     return prompt.strip()
 
 
-def call_multimodal_model(images: List[str], prompt: str) -> str:
+def call_multimodal_model(images: List[str], prompt: str) -> Dict[str, Any]:
     """调用多模态大模型进行图像分析
     
     Args:
@@ -265,6 +283,14 @@ def call_multimodal_model(images: List[str], prompt: str) -> str:
         
         if response.status_code == 200:
             content = response.output.choices[0].message.content
+            
+            # 获取token使用量信息
+            token_usage = {
+                'input_tokens': response.usage.input_tokens if hasattr(response, 'usage') and hasattr(response.usage, 'input_tokens') else 0,
+                'output_tokens': response.usage.output_tokens if hasattr(response, 'usage') and hasattr(response.usage, 'output_tokens') else 0,
+                'total_tokens': response.usage.total_tokens if hasattr(response, 'usage') and hasattr(response.usage, 'total_tokens') else 0
+            }
+            
             # 处理返回结果格式
             if isinstance(content, list):
                 # 如果返回的是列表，提取文本内容
@@ -274,11 +300,16 @@ def call_multimodal_model(images: List[str], prompt: str) -> str:
                         text_parts.append(item['text'])
                     elif isinstance(item, str):
                         text_parts.append(item)
-                return '\n'.join(text_parts)
+                analysis_text = '\n'.join(text_parts)
             elif isinstance(content, str):
-                return content
+                analysis_text = content
             else:
-                return str(content)
+                analysis_text = str(content)
+                
+            return {
+                'analysis_result': analysis_text,
+                'token_usage': token_usage
+            }
         else:
             raise Exception(f"模型调用失败 (状态码: {response.status_code}): {response.message}")
             
@@ -315,7 +346,7 @@ def analyze_simulation_images(params: MultimodalAnalysisParams) -> Dict[str, Any
         prompt = generate_analysis_prompt()
         
         # 调用多模态模型
-        analysis_result = call_multimodal_model(images_to_analyze, prompt)
+        model_response = call_multimodal_model(images_to_analyze, prompt)
         
         # 构建结果
         result = {
@@ -325,8 +356,9 @@ def analyze_simulation_images(params: MultimodalAnalysisParams) -> Dict[str, Any
                 "vswr": found_images['vswr'] if params.include_vswr else []
             },
             "total_images": len(images_to_analyze),
-            "analysis_report": analysis_result,
-            "model_used": "qwen-vl-max"
+            "analysis_report": model_response['analysis_result'],
+            "model_used": "qwen-vl-max",
+            "token_usage": model_response['token_usage']
         }
         
         # 保存报告
@@ -376,6 +408,14 @@ def save_analysis_report(result: Dict[str, Any], params: MultimodalAnalysisParam
                 f.write(f"**生成时间**: {result['timestamp']}\n\n")
                 f.write(f"**分析模型**: {result['model_used']}\n\n")
                 f.write(f"**分析图像数量**: {result['total_images']}\n\n")
+                
+                # 添加Token使用量信息
+                token_info = result.get('token_usage', {})
+                f.write(f"**Token使用量**:\n")
+                f.write(f"- 输入Token: {token_info.get('input_tokens', 0)}\n")
+                f.write(f"- 输出Token: {token_info.get('output_tokens', 0)}\n")
+                f.write(f"- 总Token: {token_info.get('total_tokens', 0)}\n\n")
+                
                 f.write(f"## 分析结果\n\n")
                 f.write(str(result['analysis_report']))
         
@@ -429,6 +469,7 @@ class MultimodalAnalysisTool(BaseTool):
             result = analyze_simulation_images(params)
             
             # 构建响应
+            token_info = result.get('token_usage', {})
             response_parts = [
                 "🔍 多模态仿真结果图像分析完成！",
                 f"\n📊 分析统计：",
@@ -436,7 +477,11 @@ class MultimodalAnalysisTool(BaseTool):
                 f"  - S参数图像: {len(result['analyzed_images']['s_parameters'])}",
                 f"  - VSWR图像: {len(result['analyzed_images']['vswr'])}",
                 f"  - 使用模型: {result['model_used']}",
-                f"  - 分析时间: {result['timestamp']}"
+                f"  - 分析时间: {result['timestamp']}",
+                f"\n🔢 Token使用量：",
+                f"  - 输入Token: {token_info.get('input_tokens', 0)}",
+                f"  - 输出Token: {token_info.get('output_tokens', 0)}",
+                f"  - 总Token: {token_info.get('total_tokens', 0)}"
             ]
             
             if params.save_report:
