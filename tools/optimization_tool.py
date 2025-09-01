@@ -750,16 +750,39 @@ class OptimizationTool(BaseTool):
     def _find_latest_hfss_project(self) -> Optional[str]:
         """查找最新的HFSS项目文件"""
         try:
-            # 在当前目录和子目录中查找.aedt文件
+            # 首先在HFSS标准项目路径中查找
+            aedt_projects_path = os.path.join(os.path.expanduser("~"), "Documents", "Ansoft")
+            
+            if os.path.exists(aedt_projects_path):
+                # 查找所有.aedt文件（HFSS项目文件）
+                project_files = [
+                    f for f in os.listdir(aedt_projects_path)
+                    if f.endswith(".aedt") and os.path.isfile(os.path.join(aedt_projects_path, f))
+                ]
+                
+                if project_files:
+                    # 返回最新修改的项目文件
+                    latest_project = max(
+                        project_files,
+                        key=lambda f: os.path.getmtime(os.path.join(aedt_projects_path, f))
+                    )
+                    latest_project_path = os.path.join(aedt_projects_path, latest_project)
+                    print(f"找到最新HFSS项目: {latest_project_path}")
+                    return latest_project_path
+            
+            # 如果标准路径中没有找到，再在当前目录和子目录中查找.aedt文件
+            print(f"在标准路径 {aedt_projects_path} 中未找到项目，尝试在当前目录中查找...")
             current_dir = Path.cwd()
             aedt_files = list(current_dir.rglob("*.aedt"))
             
-            if not aedt_files:
-                return None
+            if aedt_files:
+                # 返回最新修改的项目文件
+                latest_file = max(aedt_files, key=lambda f: f.stat().st_mtime)
+                print(f"在当前目录中找到HFSS项目: {latest_file}")
+                return str(latest_file)
             
-            # 返回最新修改的项目文件
-            latest_file = max(aedt_files, key=lambda f: f.stat().st_mtime)
-            return str(latest_file)
+            print("未找到任何HFSS项目文件")
+            return None
             
         except Exception as e:
             print(f"查找HFSS项目文件失败: {e}")

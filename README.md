@@ -22,8 +22,16 @@
 - **关键指标提取**: 谐振频率、品质因子、带宽等关键参数自动提取
 - **数据导出**: 支持CSV、JSON多格式数据导出
 
+### 🔧 智能优化算法
+- **遗传算法(GA)**: 基于自然选择和遗传机制的全局优化算法
+- **粒子群优化(PSO)**: 模拟鸟群觅食行为的群体智能优化算法
+- **蚁群算法(ACO)**: 基于蚂蚁觅食路径的启发式优化算法
+- **模拟退火(SA)**: 模拟金属退火过程的概率性优化算法
+- **多目标优化**: 支持S参数、VSWR、带宽等多个性能指标同时优化
+- **参数化优化**: 自动调整几何参数以达到最佳性能指标
+
 ### 🤖 多模态AI分析
-- **图像智能识别**: 基于Qwen VL Max和Gemini 2.0的仿真结果图像分析
+- **图像智能识别**: 基于Qwen VL Max和Gemini 2.5 Pro的仿真结果图像分析
 - **专业报告生成**: 自动生成技术分析报告和优化建议
 - **器件类型推断**: 根据S参数特征智能识别器件类型
 - **Token使用统计**: 实时监控AI调用成本
@@ -39,6 +47,7 @@ AI-Microwave-Agent/
 │   ├── srr_tool.py            # SRR结构设计工具
 │   ├── sim_tools.py           # HFSS仿真执行工具
 │   ├── result_analysis_tool.py # 仿真结果分析工具
+│   ├── optimization_tool.py   # 智能优化工具
 │   └── multimodal_analysis_tool.py # 多模态AI分析工具
 ├── scripts/                    # 底层PyAEDT脚本
 │   ├── CSRR.py                # CSRR建模脚本
@@ -120,6 +129,15 @@ python app/agent_build.py --input "提取S21与VSWR，并给我图和CSV路径�
 python app/agent_build.py --input "使用多模态AI分析刚生成的仿真结果图像，生成专业技术报告"
 ```
 
+#### 5. 智能参数优化
+```bash
+python app/agent_build.py --input "使用遗传算法优化CSRR结构参数，目标是在2.4GHz获得最小S21和最大S11"
+```
+
+```bash
+python app/agent_build.py --input "使用粒子群优化算法优化当前设计，优化目标包括S21小于-20dB，VSWR小于2"
+```
+
 ### 高级使用示例
 
 #### 指定项目路径仿真
@@ -130,6 +148,16 @@ python app/agent_build.py --input "对 C:/Users/<username>/Documents/Ansoft/CSRR
 #### 自定义分析参数
 ```bash
 python app/agent_build.py --input "分析S参数，计算1-5GHz频段的插入损耗和回波损耗，导出详细数据"
+```
+
+#### 多目标优化设计
+```bash
+python app/agent_build.py --input "使用遗传算法优化CSRR参数，种群大小50，迭代100次，目标频率2.4GHz，S21<-30dB，S11>-3dB"
+```
+
+#### 约束条件优化
+```bash
+python app/agent_build.py --input "使用粒子群优化算法，优化外环半径在2-5mm范围内，环宽度0.3-1.0mm，目标VSWR<1.5"
 ```
 
 ## 🔧 配置说明
@@ -187,6 +215,14 @@ sim:
 - 专业技术报告生成
 - 优化建议和改进方案
 
+### OPTIMIZE_DESIGN - 智能优化工具
+- 多种优化算法支持(GA、PSO、ACO、SA)
+- 自动HFSS项目检测和参数提取
+- 多目标优化(S参数、VSWR、带宽等)
+- 实时优化进度监控和结果可视化
+- 详细优化报告和参数推荐
+- 支持用户自定义优化目标和约束条件
+
 ## 🔍 技术特点
 
 ### 智能化程度高
@@ -219,9 +255,10 @@ sim:
 
 ### 近期计划
 - [ ] 支持更多微波器件类型(贴片天线、滤波器等)
-- [ ] 集成优化算法(遗传算法、粒子群优化等)
+- [x] 集成优化算法(遗传算法、粒子群优化、蚁群算法、模拟退火等)
 - [ ] 增加实时仿真监控界面
 - [ ] 支持批量设计和参数扫描
+- [ ] 增强优化算法性能和收敛速度
 
 ### 长期规划
 - [ ] 机器学习辅助设计
