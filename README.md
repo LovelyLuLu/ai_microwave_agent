@@ -138,6 +138,10 @@ python app/agent_build.py --input "使用遗传算法优化CSRR结构参数，�
 python app/agent_build.py --input "使用粒子群优化算法优化当前设计，优化目标包括S21小于-20dB，VSWR小于2"
 ```
 
+```bash
+python app/agent_build.py --input "使用遗传算法优化CSRR结构,启用ANN代理模型，优化变量：外环半径2-5mm，环宽度0.2-1mm，开口宽度0.1-0.5mm，目标：最大化S21参数，种群大小5，迭代3次"
+```
+
 ### 高级使用示例
 
 #### 指定项目路径仿真
@@ -210,7 +214,7 @@ sim:
 - 多格式数据导出
 
 ### MULTIMODAL_ANALYSIS - 多模态AI分析工具
-- 基于Qwen VL Max和Gemini 2.0的图像分析
+- 基于Qwen VL Max和Gemini 2.5 Pro的图像分析
 - 智能器件类型识别
 - 专业技术报告生成
 - 优化建议和改进方案
@@ -254,7 +258,7 @@ sim:
 ## 🔮 发展路线
 
 ### 近期计划
-- [ ] 支持更多微波器件类型(贴片天线、滤波器等)
+- [ ] 支持更多微波器件类型(贴片天线、巴伦，匹配电路，双工器，衰减器等)
 - [x] 集成优化算法(遗传算法、粒子群优化、蚁群算法、模拟退火等)
 - [ ] 增加实时仿真监控界面
 - [ ] 支持批量设计和参数扫描
@@ -276,9 +280,6 @@ sim:
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 开启Pull Request
 
-## 📄 许可证
-
-本项目采用MIT许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
 
 ## 📞 联系方式
 
