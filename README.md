@@ -8,6 +8,7 @@
 ### 🎯 智能器件设计
 - **CSRR结构设计**: 互补开口谐振环(Complementary Split Ring Resonator)自动建模
 - **SRR结构设计**: 开口谐振环(Split Ring Resonator)参数化设计
+- **滤波器设计** :滤波器（LTCC Filter）自动化设计
 - **参数化建模**: 支持几何参数、材料属性、边界条件的智能配置
 - **自动网格划分**: 基于结构特征的自适应网格生成
 
